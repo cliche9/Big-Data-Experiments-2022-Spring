@@ -1,9 +1,10 @@
 package examples.hbase;
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.util.Bytes;
 
 public class HBaseDemo {
 	private static Configuration conf;
@@ -12,31 +13,32 @@ public class HBaseDemo {
 	public static void main(String[] args) {
 		connect();
 		try {
-			put("Student", "0", "Score:English", "45");
-			put("Student", "0", "Score:Math", "89");
-			put("Student", "0", "Score:Computer", "100");
-			get("Student", "0", "Score:English");
+			put("Student", "2", "Name", "Scofield");
+			put("Student", "2", "Score:English", "45");
+			put("Student", "2", "Score:Math", "89");
+			put("Student", "2", "Score:Computer", "100");
+			get("Student", "2", "Score:English");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		disconnect();
 	}
 
-	public static void put(String tableName, String rowKey, String column, String value) {
+	public static void put(String tableName, String rowKey, String column, String value) throws IOException {
 		Table table = connection.getTable(TableName.valueOf(tableName));
 		Put put = new Put(rowKey.getBytes());
 		String[] cols = column.split(":");
-		byte[] family = cols[0], qualifier = (cols.length == 2) ? cols[1] : "".getBytes();
+		byte[] family = cols[0].getBytes(), qualifier = (cols.length == 2) ? cols[1].getBytes() : "".getBytes();
 		put.addColumn(family, qualifier, value.getBytes());
 		table.put(put);
 		table.close();
 	}
 
-	public static void get(String tableName, String rowKey, String column) {
+	public static void get(String tableName, String rowKey, String column) throws IOException {
 		Table table = connection.getTable(TableName.valueOf(tableName));
 		Get get = new Get(rowKey.getBytes());
 		String[] cols = column.split(":");
-		byte[] family = cols[0], qualifier = (cols.length == 2) ? cols[1] : "".getBytes();
+		byte[] family = cols[0].getBytes(), qualifier = (cols.length == 2) ? cols[1].getBytes() : "".getBytes();
 		get.addColumn(family, qualifier);
 		Result result = table.get(get);
 		print(result);
