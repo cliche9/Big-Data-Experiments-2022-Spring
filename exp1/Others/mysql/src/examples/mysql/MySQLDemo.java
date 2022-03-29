@@ -25,8 +25,8 @@ public class MySQLDemo {
 			if (!statement.executeQuery("select * from Student where Name = \"Scofield\";").next()) {
 				// insert
 				String insert = "insert into Student(Name, English, Math, Computer) values(\"Scofield\", 45, 89, 100);";
-				if (statement.execute(insert))
-					System.out.println("Successfully inserted");
+				statement.execute(insert);
+				System.out.println("Successfully inserted");
 			}
 			String queryEnglish = "select English from Student where Name = \"Scofield\"";
 			ResultSet resultSet = statement.executeQuery(queryEnglish);
