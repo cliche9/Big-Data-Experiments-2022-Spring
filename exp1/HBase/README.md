@@ -7,7 +7,7 @@
 6. count: -count tableName
 7. createTable: -create tableName fields
 > fields: field1 field2 field3 ...
-8. addRecord: -add tableName rowKey fiedls values
+8. addRecord: -add tableName rowKey fields values
 > fields: field1,field2,field3... \
   values: value1,value2,value3...
 9. scanColumn: -scan tableName column

@@ -8,13 +8,16 @@ import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
-
 public class HBase {
 	private Configuration conf;
 	private Connection connection;
 	private Admin admin;
-
+		
 	public static void main(String[] args) {
+		for (int i = 0; i < args.length; i++) {
+			String str = String.format("%d: %s", i, args[i]);
+			System.out.println(str);
+		}
 		HBase hBase = new HBase();
 		String opt = args[1];
 		try {
@@ -45,12 +48,15 @@ public class HBase {
 					hBase.print(args[2]);
 					break;
 				case "insert":
-					String[] colsInsert = args[4].split(":");
-					hBase.insert(args[2], args[3], colsInsert[0], colsInsert[1], args[5]);
+					String[] cols = args[4].split(":");
+					String family = cols[0], qualifier = (cols.length == 2) ? cols[1] : "";
+					hBase.insert(args[2], args[3], family, qualifier, args[5]);
 					break;
 				case "deleteCol":
-					String[] colsDelete = args[4].split(":");
-					hBase.deleteCol(args[2], args[3], colsDelete[0], colsDelete[1]);
+					cols = args[4].split(":");
+					family = cols[0];
+					qualifier = (cols.length == 2) ? cols[1] : "";
+					hBase.deleteCol(args[2], args[3], family, qualifier);
 					break;
 				case "clear":
 					hBase.clear(args[2]);
@@ -122,7 +128,8 @@ public class HBase {
 		for (int i = 0; i < fields.length; i++) {
 			Put put = new Put(row.getBytes());
 			String[] cols = fields[i].split(":");
-			put.addColumn(cols[0].getBytes(), cols[1].getBytes(), values[i].getBytes());
+			byte[] family = cols[0].getBytes(), qualifier = (cols.length == 2) ? cols[1].getBytes() : "".getBytes();
+			put.addColumn(family, qualifier, values[i].getBytes());
 			table.put(put);
 		}
 		table.close();
@@ -138,7 +145,8 @@ public class HBase {
 		Table table = connection.getTable(TableName.valueOf(tableName));
 		Scan scan = new Scan();
 		String[] cols = column.split(":");
-		scan.addColumn(cols[0].getBytes(), cols[1].getBytes());
+		byte[] family = cols[0].getBytes(), qualifier = (cols.length == 2) ? cols[1].getBytes() : "".getBytes();
+		scan.addColumn(family, qualifier);
 		ResultScanner scanner = table.getScanner(scan);
 		for (Result result : scanner)
 			printCell(result);
@@ -165,7 +173,8 @@ public class HBase {
 		Table table = connection.getTable(TableName.valueOf(tableName));
 		Put put = new Put(row.getBytes());
 		String[] cols = column.split(":");
-		put.addColumn(cols[0].getBytes(), cols[1].getBytes(), value.getBytes());
+		byte[] family = cols[0].getBytes(), qualifier = (cols.length == 2) ? cols[1].getBytes() : "".getBytes();
+		put.addColumn(family, qualifier, value.getBytes());
 		table.put(put);
 		table.close();
 		disconnect();
@@ -227,8 +236,6 @@ public class HBase {
 		connect();
 		Table table = connection.getTable(TableName.valueOf(tableName));
 		Delete delete = new Delete(rowKey.getBytes());
-		// 删除指定列族
-		delete.addFamily(Bytes.toBytes(columnFamily));
 		// 删除指定列
 		delete.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column));
 		table.delete(delete);
