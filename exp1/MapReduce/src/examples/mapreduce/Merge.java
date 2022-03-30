@@ -2,6 +2,7 @@ package examples.mapreduce;
 
 import java.io.IOException;
 
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -35,6 +36,7 @@ public class Merge {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
+		FileSystem hdfs = FileSystem.get(conf);
 		String[] otherArgs = new String[] {
 			"hdfs://localhost:9000/user/hadoop/exp1/MergeInput/inputA.txt",
 			"hdfs://localhost:9000/user/hadoop/exp1/MergeInput/inputB.txt",
@@ -44,16 +46,25 @@ public class Merge {
 			System.err.println("Usage: merge <in1> <in2> <out>");
 			System.exit(2);
 		}
+		
+		Path outputPath = new Path(otherArgs[otherArgs.length - 1]);
+		if (hdfs.exists(outputPath)) {
+			hdfs.delete(outputPath, true);
+		}
 
 		Job job = Job.getInstance(conf, "Merge and remove duplicates");
 		job.setJarByClass(Merge.class);
+		
 		job.setMapperClass(MergeMapper.class);
-		job.setCombinerClass(MergeReducer.class);
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputKeyClass(Text.class);
+
 		job.setReducerClass(MergeReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
-		FileInputFormat.setInputPaths(job, new Path(otherArgs[0]), new Path(otherArgs[1]));
-		FileOutputFormat.setOutputPath(job, new Path(otherArgs[2]));
+		for (int i = 0; i < otherArgs.length - 1; i++)
+			FileInputFormat.addInputPath(job, new Path(otherArgs[i]));
+		FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 1]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 

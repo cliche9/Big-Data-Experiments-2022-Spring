@@ -54,11 +54,11 @@ public class MergeSort {
 			"hdfs://localhost:9000/user/hadoop/exp1/MergeSortOutput"
 		};
 		if (otherArgs.length != 4) {
-			System.err.println("Usage: merge <in1> <in2> <in3> <out>");
+			System.err.println("Usage: mergesort <in1> <in2> <in3> <out>");
 			System.exit(2);
 		}
 		
-		Path outputPath = new Path(otherArgs[3]);
+		Path outputPath = new Path(otherArgs[otherArgs.length - 1]);
 		if (hdfs.exists(outputPath)) {
 			hdfs.delete(outputPath, true);
 		}
@@ -73,8 +73,9 @@ public class MergeSort {
 		job.setReducerClass(MergeSortReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
-		FileInputFormat.setInputPaths(job, new Path(otherArgs[0]), new Path(otherArgs[1]), new Path(otherArgs[2]));
-		FileOutputFormat.setOutputPath(job, new Path(otherArgs[3]));
+		for (int i = 0; i < otherArgs.length - 1; i++)
+			FileInputFormat.addInputPath(job, new Path(otherArgs[i]));
+		FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 1]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
