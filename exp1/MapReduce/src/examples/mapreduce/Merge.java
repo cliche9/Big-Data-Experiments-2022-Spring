@@ -17,16 +17,16 @@ public class Merge {
 	 * merge fileA and fileB, removing duplicates
 	 */
 	// override map func, copy input: 'value' to output: 'key' 
+	// Mapper<KeyIn, ValueIn, KeyOut, ValueOut>
 	public static class MergeMapper extends Mapper<Object, Text, Text, Text> {
-		private static Text text = new Text();
-
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			text = value;
-			context.write(text, new Text(""));
+			// 将输入的value作为key, 利用Map自身的性质去重
+			context.write(new Text(value), new Text(""));
 		}
 	}
 	
 	// override reduce func, copy input: 'key' to output: 'key'
+	// Reducer<KeyIn, ValueIn, KeyOut, ValueOut>
 	public static class MergeReducer extends Reducer<Text, Text, Text, Text> {
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 			context.write(key, new Text(""));
@@ -36,9 +36,9 @@ public class Merge {
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new String[] {
-			"hdfs://localhost:9000/user/hadoop/exp1/inputA.txt",
-			"hdfs://localhost:9000/user/hadoop/exp1/inputB.txt",
-			"hdfs://localhost:9000/user/hadoop/exp1/output.txt"
+			"hdfs://localhost:9000/user/hadoop/exp1/MergeInput/inputA.txt",
+			"hdfs://localhost:9000/user/hadoop/exp1/MergeInput/inputB.txt",
+			"hdfs://localhost:9000/user/hadoop/exp1/MergeOutput"
 		};
 		if (otherArgs.length != 3) {
 			System.err.println("Usage: merge <in1> <in2> <out>");
