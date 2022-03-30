@@ -52,11 +52,21 @@ public class HBase {
 					String family = cols[0], qualifier = (cols.length == 2) ? cols[1] : "";
 					hBase.insert(args[2], args[3], family, qualifier, args[5]);
 					break;
+				case "insertColumnFamily":
+					cols = args[3].split(":");
+					family = cols[0];
+					hBase.insertColumnFamily(args[2], family);
+					break;
 				case "deleteCol":
 					cols = args[4].split(":");
 					family = cols[0];
 					qualifier = (cols.length == 2) ? cols[1] : "";
 					hBase.deleteCol(args[2], args[3], family, qualifier);
+					break;
+				case "deleteColumnFamily":
+					cols = args[3].split(":");
+					family = cols[0];
+					hBase.deleteColumnFamily(args[2], family);
 					break;
 				case "clear":
 					hBase.clear(args[2]);
@@ -218,7 +228,7 @@ public class HBase {
 	}
 
 	/* 
-	 * (3) 向已经创建好的表添加和删除指定的列族或列
+	 * (3) 向已经创建好的表对应行添加和删除指定的列族或列
 	 */
 	public void insert(String tableName, String rowKey, String columnFamily, String column, String value) 
 			throws IOException {
@@ -240,6 +250,25 @@ public class HBase {
 		delete.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column));
 		table.delete(delete);
 		table.close();
+		disconnect();
+	}
+
+	/**
+	 * 插入/删除列族columnamily
+	 * @param tableName
+	 * @param columnFamily
+	 * @throws IOException
+	 */
+	public void insertColumnFamily(String tableName, String columnFamily) throws IOException {
+		connect();
+		HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(columnFamily);
+		admin.addColumn(TableName.valueOf(tableName), hColumnDescriptor);
+		disconnect();
+	}
+
+	public void deleteColumnFamily(String tableName, String columnFamily) throws IOException {
+		connect();
+		admin.deleteColumn(TableName.valueOf(tableName), columnFamily.getBytes());
 		disconnect();
 	}
 
