@@ -2,6 +2,7 @@ package examples.mapreduce;
 
 import java.io.IOException;
 
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -39,12 +40,13 @@ public class MergeSort {
 				++index;
 				maxValue = key.get();
 			}
-			context.write(new Text(index + "" + key.toString()), new Text(""));
+			context.write(new Text(index + " " + key.toString()), new Text(""));
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
+		FileSystem hdfs = FileSystem.get(conf);
 		String[] otherArgs = new String[] {
 			"hdfs://localhost:9000/user/hadoop/exp1/MergeSortInput/input1.txt",
 			"hdfs://localhost:9000/user/hadoop/exp1/MergeSortInput/input2.txt",
@@ -55,11 +57,19 @@ public class MergeSort {
 			System.err.println("Usage: merge <in1> <in2> <in3> <out>");
 			System.exit(2);
 		}
+		
+		Path outputPath = new Path(otherArgs[3]);
+		if (hdfs.exists(outputPath)) {
+			hdfs.delete(outputPath, true);
+		}
 
 		Job job = Job.getInstance(conf, "MergeSort");
-		job.setJarByClass(Merge.class);
+		job.setJarByClass(MergeSort.class);
+
 		job.setMapperClass(MergeSortMapper.class);
-		job.setCombinerClass(MergeSortReducer.class);
+		job.setMapOutputKeyClass(IntWritable.class);
+		job.setMapOutputValueClass(Text.class);
+
 		job.setReducerClass(MergeSortReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
@@ -67,5 +77,4 @@ public class MergeSort {
 		FileOutputFormat.setOutputPath(job, new Path(otherArgs[3]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
-
 }
