@@ -1,3 +1,5 @@
+from urllib import request
+from pandas import DataFrame
 from pyspark import SparkContext, SparkConf
 import argparse
 
@@ -16,12 +18,23 @@ def main():
     )
     parser.add_argument(
         '--appname',
+        required=True,
         help='the name of the spark application (default: SparkPageRank)',
         default='SparkPageRank'
     )
     parser.add_argument(
         '--master',
         help='the master url for the spark cluster'
+    )
+    parser.add_argument(
+        '--input',
+        required=True,
+        help='the input path of data for PageRank'
+    )
+    parser.add_argument(
+        '--output',
+        required=True,
+        help='the output path of PageRank result'
     )
     args = parser.parse_args()
 
@@ -31,10 +44,17 @@ def main():
         sconf.setMaster(args.master)
     # 定义sparkContext
     sc = SparkContext(conf=sconf)
+    # 读取数据
+    input = args.input
+    output = args.output
+    data_frame = sc.textFile(input)
+    print(data_frame)
+    print(data_frame.collect())
 
 
 if __name__== "__main__":
-    
+    main()
+    """
     conf = SparkConf()
     conf.setMaster("spark://localhost:7077")
     conf.setAppName("PageRank")
@@ -71,4 +91,5 @@ if __name__== "__main__":
 
     for i in j:
         print i
+    """
 
