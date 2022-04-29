@@ -1,24 +1,2 @@
-# root
-/*
-!.gitignore
-!README.md
-
-# exp0
-!/exp0
-/exp0/*
-!*
-
-# exp1
-!/exp1
-/exp1/*
-!*
-
-# exp2
-!/exp2
-/exp2/*
-!*
-
-# Notes
-!/Notes
-/Notes/*
-!*.md
+# .vscode
+*.json
