@@ -1,5 +1,3 @@
-from urllib import request
-from pandas import DataFrame
 from pyspark import SparkContext, SparkConf
 import argparse
 
@@ -47,9 +45,8 @@ def main():
     # 读取数据
     input = args.input
     output = args.output
-    data_frame = sc.textFile(input)
-    print(data_frame)
-    print(data_frame.collect())
+    dataset = sc.textFile(input)
+    dataset.show(5);
 
 
 if __name__== "__main__":
