@@ -2,18 +2,9 @@ from pyspark import SparkConf, SparkContext
 import argparse
 from operator import add
 
-# input: sourceUrl, PR, targetUrls
-# output: targetUrl, PR / len(targetUrls)
-def loop_pagerank(parts):
-    targetUrls = parts[1][1].split(",")
-    toPR = parts[1][0] / len(targetUrls)
-    
-    for toPage in targetUrls:
-        yield(toPage, toPR)
-        
 # input: sourceUrl \t targetUrls
 # output: sourceUrl, targetUrls
-def link_function(line):
+def graph_builder(line):
     parts = line.split("\t")
     return parts[0], parts[1]
 
@@ -21,6 +12,15 @@ def link_function(line):
 # output: sourceUrl, 1.0
 def init_pagerank(parts):
     return parts[0], 1.0
+
+# input: sourceUrl, PR, targetUrls
+# output: targetUrl, PR / len(targetUrls)
+def loop_pagerank(parts):
+    target_urls = parts[1][1].split(",")
+    target_pr = parts[1][0] / len(target_urls)
+    
+    for target_url in target_urls:
+        yield(target_url, target_pr)
 
 # .10f
 def decimal_format(parts):
@@ -30,7 +30,7 @@ def decimal_format(parts):
 def pagerank(sc, inpath, outpath, iterations):
     # GraphBuilder
     # @params: sourceUrl, targetUrls
-    graph = sc.textFile(inpath).map(link_function).cache()
+    graph = sc.textFile(inpath).map(graph_builder).cache()
     
     # graph.foreach(print)
     
