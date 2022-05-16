@@ -16,13 +16,15 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class PageRankIterator {
 
-    private static final float alpha = 0.85f;
+    private static final double alpha = 0.85f;
     
-    public static class PageRankMapper extends Mapper<Text, Text, Text, Text> {
+    public static class PageRankMapper extends Mapper<Object, Text, Text, Text> {
 
         /**
          * Input
-         *  <Url, PR + '\t' + TargetUrls>
+         *  key: 行偏移量
+         *  value: 该行对应的文本信息
+         *  Url + '\t' + PR + '\t' + TargetUrls
          * Output
          *  <Url, TargetUrls>, <TargetUrl, PR>
          * @param key
@@ -31,17 +33,17 @@ public class PageRankIterator {
          * @throws IOException
          * @throws InterruptedException
          */
-        protected void map(Text key, Text value, Context context) throws IOException, InterruptedException, IndexOutOfBoundsException {
+        protected void map(Object key, Text value, Context context) throws IOException, InterruptedException, IndexOutOfBoundsException {
             // tmp[0]: PR值
             // tmp[1]: targetUrls, 以","作为分隔
             String[] tmp = value.toString().split("\t");
-            float prValue = Float.valueOf(tmp[0]);
-            String[] targetUrls = tmp[1].split(",");
+            double prValue = Double.valueOf(tmp[1]);
+            String[] targetUrls = tmp[2].split(",");
             int n = targetUrls.length;
             for (int i = 0; i < n; i++) {
-                context.write(new Text(targetUrls[i]), new Text(Float.toString(prValue / n)));
+                context.write(new Text(targetUrls[i]), new Text(Double.toString(prValue / n)));
             }
-            context.write(key, new Text('#' + tmp[1]));
+            context.write(new Text(tmp[0]), new Text('#' + tmp[2]));
         }
     }
 
@@ -60,7 +62,7 @@ public class PageRankIterator {
          * @throws InterruptedException
          */
         protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-            float newPR = 0;
+            double newPR = 0;
             String targetUrls = new String();
             for (Text value : values) {
                 String str = value.toString();
@@ -69,10 +71,10 @@ public class PageRankIterator {
                     targetUrls = str.substring(1);
                 // 其他节点对key的pr贡献值
                 else
-                    newPR += Float.valueOf(str);
+                    newPR += Double.valueOf(str);
             }
             newPR = newPR * alpha + (1 - alpha);    // pr = pr * alpha + (1 - alpha) / N
-            context.write(key, new Text(Float.toString(newPR) + '\t' + targetUrls));
+            context.write(key, new Text(Double.toString(newPR) + '\t' + targetUrls));
         }
     }
 

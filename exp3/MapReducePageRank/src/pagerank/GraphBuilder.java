@@ -14,7 +14,7 @@ import org.apache.hadoop.mapreduce.Mapper;
  * GraphBuilder: 建立网页链接关系图
  */
 public class GraphBuilder {
-    private static final float initPR = 1.0f;
+    private static final double initPR = 1.0f;
 
     public static class GraphBuilderMapper extends Mapper<Object, Text, Text, Text> {
         /**
@@ -35,7 +35,7 @@ public class GraphBuilder {
             String sourceUrl = Urls[0];
             String targetUrls = Urls[1];
             // 此处以\t作为分割符
-            context.write(new Text(sourceUrl), new Text(Float.toString(initPR) + '\t' + targetUrls));
+            context.write(new Text(sourceUrl), new Text(Double.toString(initPR) + '\t' + targetUrls));
         }
     }
 
