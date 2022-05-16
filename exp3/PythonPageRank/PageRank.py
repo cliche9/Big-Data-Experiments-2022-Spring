@@ -1,16 +1,62 @@
-from pyspark import SparkContext, SparkConf
+from pyspark import SparkConf, SparkContext
 import argparse
+from operator import add
 
-def f(x):
-    # print x
-    list1 = []
-    s = len(x[1][0])
-    for y in x[1][0]:
-        list1.append(tuple((y, x[1][1]/s)))
-    # print list
-    return list1
+# input: sourceUrl, PR, targetUrls
+# output: targetUrl, PR / len(targetUrls)
+def loop_pagerank(parts):
+    targetUrls = parts[1][1].split(",")
+    toPR = parts[1][0] / len(targetUrls)
+    
+    for toPage in targetUrls:
+        yield(toPage, toPR)
+        
+# input: sourceUrl \t targetUrls
+# output: sourceUrl, targetUrls
+def link_function(line):
+    parts = line.split("\t")
+    return parts[0], parts[1]
 
-def main():
+# input: sourceUrl, targetUrls
+# output: sourceUrl, 1.0
+def init_pagerank(parts):
+    return parts[0], 1.0
+
+# .10f
+def decimal_format(parts):
+    return parts[0], float('%.10f' % parts[1])
+    
+    
+def pagerank(sc, inpath, outpath, iterations):
+    # GraphBuilder
+    # @params: sourceUrl, targetUrls
+    graph = sc.textFile(inpath).map(link_function).cache()
+    
+    # graph.foreach(print)
+    
+    # PageRankIterator
+    # Initialization: sourceUrl, 1.0
+    pr_value = graph.map(init_pagerank)
+    
+    # pr_value.foreach(print)
+    
+    for _ in range(iterations):
+        
+        # sourceUrl, PR, targetUrls
+        contribs = pr_value.join(graph).flatMap(loop_pagerank)
+
+        # contribs.foreach(print)
+        
+        # sourceUrl, PR
+        pr_value = contribs.reduceByKey(add).mapValues(lambda pr : pr * 0.85 + 0.15)
+        
+        # pr_value.foreach(print)
+        
+    pr_value.sortBy(keyfunc = lambda x:x[1], ascending = False) \
+            .map(decimal_format).coalesce(1).saveAsTextFile(outpath)
+        
+        
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='process some log messages, storing them and signaling a rest server'
     )
@@ -35,58 +81,11 @@ def main():
         help='the output path of PageRank result'
     )
     args = parser.parse_args()
-
     # 初始化spark
     sconf = SparkConf().setAppName(args.appname)
     if args.master:
         sconf.setMaster(args.master)
     # 定义sparkContext
     sc = SparkContext(conf=sconf)
-    # 读取数据
-    input = args.input
-    output = args.output
-    dataset = sc.textFile(input)
-    dataset.show(5);
-
-
-if __name__== "__main__":
-    main()
-    """
-    conf = SparkConf()
-    conf.setMaster("spark://localhost:7077")
-    conf.setAppName("PageRank")
-
-    # 定义sparkContext
-    sc = SparkContext(conf=conf)
-
-    # 原始数据
-    list = [('A', ('D',)), ('B', ('A',)), ('C', ('A', 'B')), ('D', ('A', 'C'))]
-
-    # 必须转换成key-values,持久化操作提高效率，partitionBy将相同key的元素哈希到相同的机器上，
-    # 省去了后续join操作shuffle开销
-    # tuple () 元组
-    pages = sc.parallelize(list).map(lambda x: (x[0],  tuple(x[1]))).partitionBy(4).cache()
-
-    # 初始pr值都设置为1
-    links = sc.parallelize(['A', 'B', 'C', 'D']).map(lambda x: (x, 1.0))
-
-    # 开始迭代
-    for i in range(1, 100):
-        # join会把links和page按k合并，如('A',('D',))和('A',1.0) join之后变成 ('A', ('D',1.0))
-        # flatMap调用了f函数，并把结果平铺
-        rank = pages.join(links).flatMap(f)
-
-        # reduce
-        links = rank.reduceByKey(lambda x, y: x+y)
-
-        # 修正
-        links = links.mapValues(lambda x: 0.15+0.85*x)
-
-
-    # links.saveAsTextFile("./pagerank")
-    j = links.collect()
-
-    for i in j:
-        print i
-    """
-
+    
+    pagerank(sc, args.input, args.output, 10)
