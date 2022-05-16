@@ -30,7 +30,7 @@ public class PageRankDriver {
 			PageRankIterator.main(forItr);
 		}
 		
-		String[] forRV = {args[1] + "/Data" + loopMax, args[1] + "/FinalRank/Top10"};  // PageRankViewer
+		String[] forRV = {args[1] + "/Data" + loopMax, args[1] + "/FinalRank"};  // PageRankViewer
 		if (hdfs.exists(new Path(forRV[1])))
 			hdfs.delete(new Path(forRV[1]), true);
 		PageRankViewer.main(forRV);

@@ -37,13 +37,10 @@ public class PageRankViewer {
     }
 
     public static class ViewerReducer extends Reducer<DoubleWritable, Text, Text, Text> {
-
+        
         protected void reduce(DoubleWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-            int i = 0;
             for (Text value : values) {
                 context.write(new Text("(" + value + ", " + String.format("%.10f", key.get()) + ")"), null);
-                if (++i == 10)
-                    break;
             }    
         }
     }
