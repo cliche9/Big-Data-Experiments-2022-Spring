@@ -44,7 +44,7 @@ def pagerank(sc, inpath, outpath, iterations):
         
         # sourceUrl, PR, targetUrls
         contribs = pr_value.join(graph).flatMap(loop_pagerank)
-
+        
         # contribs.foreach(print)
         
         # sourceUrl, PR
