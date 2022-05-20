@@ -46,7 +46,6 @@ public class KMeansUpdater {
 					k = i;
 				}
 			}
-
 			context.write(new IntWritable(Integer.parseInt(key.toString())), new Text(clusters.get(k).toString()));
 		}
 		
@@ -81,6 +80,8 @@ public class KMeansUpdater {
 		job.setReducerClass(UpdaterReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
+
+		// job.setNumReduceTasks(4);
 
         FileInputFormat.addInputPath(job, new Path(args[1]));
         FileOutputFormat.setOutputPath(job, new Path(args[2]));
