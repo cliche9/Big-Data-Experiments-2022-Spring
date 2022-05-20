@@ -24,17 +24,16 @@ class Kmeans(object):
             pre_mu = self.mu.copy()
             # 计算每个sample对应的group
             for i, xi in enumerate(x):
-                # 选取对于sample xi来说，最近的group作为label，距离度量使用L2-Norm ^ 2
+                # 选取对于sample xi来说，最近的group作为label，距离度量使用L2-Norm
                 self.label[i] = np.argmin(linalg.norm(xi - self.mu, axis=1, keepdims=True))
             # 更新每个group的 mu_j 对应的颜色
             for j in range(self.k):
                 # 判断group j是否有数据点
                 if (self.label == j).any():
                     self.mu[j] = np.sum(x[self.label == j], axis=0) / np.sum(self.label == j)
-            """
+            
             if (linalg.norm(self.mu - pre_mu, axis=1, keepdims=True) < epsilon).all():
                 break
-            """
 
         return loop_count
 
@@ -110,9 +109,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # append_result(args.input + f"mapredoutput/sequence", args.output + f"mapredoutput/mapredoutput.tiff")
-    deserialize(args.input + "/mapredoutput/mapred_out", args.output + "/mapredoutput/mapred_out_img.tiff")
+    # deserialize(args.input + "/mapredoutput/mapred_out", args.output + "/mapredoutput/mapred_out_img.tiff")
 
-    """
     large_img = cv2.imread(args.input + "bird_large.tiff")
     small_img = cv2.imread(args.input + "bird_small.tiff")
 
@@ -128,4 +126,3 @@ if __name__ == "__main__":
 
     # 序列化/反序列化颜色压缩图像
     serialization(new_img, 4)
-    """
