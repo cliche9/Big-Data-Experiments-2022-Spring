@@ -10,15 +10,15 @@ class Kmeans(object):
     def __init__(self, source_image, k=16):
         self.training_x = source_image.copy().reshape(-1, 3)
         self.label = np.zeros(self.training_x.shape[0])
-        self.mu = np.random.randint(low=0, high=255, size=(k, 3)).astype(np.float64)
+        self.mu = self.training_x[:k].astype(np.float64)
         self.k = k
 
-    def train(self):
+    def train(self, loop):
         x = self.training_x
         epsilon = 1e-5
         loop_count = 0
-        # 最多loop 100次
-        for _ in trange(100):
+        # 最多loop 10次
+        for _ in trange(loop):
             loop_count += 1
             pre_mu = self.mu.copy()
             # 计算每个sample对应的group
@@ -30,9 +30,10 @@ class Kmeans(object):
                 # 判断group j是否有数据点
                 if (self.label == j).any():
                     self.mu[j] = np.sum(x[self.label == j], axis=0) / np.sum(self.label == j)
-
+            """
             if (linalg.norm(self.mu - pre_mu, axis=1, keepdims=True) < epsilon).all():
                 break
+            """
 
         return loop_count
 
@@ -95,6 +96,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # deserialize(args.input + f"part-r-00000", args.output + f"mapredoutput.tiff")
+    
     large_img = cv2.imread(args.input + "bird_large.tiff")
     small_img = cv2.imread(args.input + "bird_small.tiff")
 
@@ -104,8 +107,8 @@ if __name__ == "__main__":
     # K-Means
     print('converting 8 bit colors to 4 bit colors ...')
     kmeans = Kmeans(small_img, k=16)
-    kmeans.train()
-    new_img = np.uint8(np.round(kmeans.reassign(large_img)))
+    kmeans.train(loop=10)
+    new_img = (kmeans.reassign(large_img)).astype(np.uint8)
     # cv2.imwrite(args.output + "bird_large_4bits.tiff", ))
 
     # 序列化/反序列化颜色压缩图像
