@@ -1,16 +1,21 @@
 package kmeans;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 
 public class KMeansIterator {
 
@@ -24,9 +29,10 @@ public class KMeansIterator {
             Configuration conf = context.getConfiguration();
             String clusterPath = conf.get("cluster_path");
             BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(conf).open(new Path(clusterPath))));
-            String line;
+            String line = new String();
             while ((line = reader.readLine()) != null)
-				clusters.add(new Point(line.split("\t")[1]));
+				clusters.add(new Point(line));
+
             reader.close();
         }
 
@@ -48,20 +54,22 @@ public class KMeansIterator {
 
 	public static class KMeansReducer extends Reducer<IntWritable, Text, Text, Text> {
 
-		protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+		protected void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 			int n = 0;
 			Point p = new Point();
 			for (Text value : values) {
 				p = p.add(new Point(value.toString()));
 				++n;
 			}
-			context.write(key, new Text(p.divide(n).toString()));
+
+			context.write(null, new Text(p.divide(n).toString()));
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "KMeans");
+		conf.set("cluster_path", args[0]);
+        Job job = Job.getInstance(conf, "KMeansIterator");
         job.setJarByClass(KMeansIterator.class);
 
 		job.setMapperClass(KMeansMapper.class);
@@ -72,8 +80,8 @@ public class KMeansIterator {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
-        FileInputFormat.addInputPath(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileInputFormat.addInputPath(job, new Path(args[1]));
+        FileOutputFormat.setOutputPath(job, new Path(args[2]));
         job.waitForCompletion(true);
 	}
 }

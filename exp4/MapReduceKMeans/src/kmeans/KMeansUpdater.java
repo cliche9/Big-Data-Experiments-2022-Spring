@@ -2,8 +2,24 @@ package kmeans;
 
 import java.util.List;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+
 public class KMeansUpdater {
-    public static class UpdaterMapper extends Mapper<Object, Text, Text, Text> {
+    public static class UpdaterMapper extends Mapper<Object, Text, IntWritable, Text> {
 		private List<Point> clusters = new ArrayList<>();
 		/**
          * setup: 读入k-means center
@@ -15,7 +31,7 @@ public class KMeansUpdater {
             BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(conf).open(new Path(clusterPath))));
             String line;
             while ((line = reader.readLine()) != null)
-				clusters.add(new Point(line.split("\t")[1]));
+				clusters.add(new Point(line));
             reader.close();
         }
 
@@ -31,20 +47,23 @@ public class KMeansUpdater {
 				}
 			}
 
-			context.write(key, new Text(clusters.get(k).toString()));
+			context.write(new IntWritable(Integer.parseInt(key.toString())), new Text(clusters.get(k).toString()));
 		}
-
+		
 	}
 
 	public static class UpdaterReducer extends Reducer<IntWritable, Text, Text, Text> {
 
-		protected void reduce(IntWritable key, Text value, Context context) throws IOException, InterruptedException {
-			context.write(null, value);
+		protected void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+			for (Text value : values) {
+				context.write(null, new Text(value.toString()));
+			}
 		}
 	}
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
+		conf.set("cluster_path", args[0]);
         Job job = Job.getInstance(conf, "KMeansUpdater");
         job.setJarByClass(KMeansUpdater.class);
 
@@ -56,8 +75,8 @@ public class KMeansUpdater {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
-        FileInputFormat.addInputPath(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileInputFormat.addInputPath(job, new Path(args[1]));
+        FileOutputFormat.setOutputPath(job, new Path(args[2]));
         job.waitForCompletion(true);
 	}
 }
