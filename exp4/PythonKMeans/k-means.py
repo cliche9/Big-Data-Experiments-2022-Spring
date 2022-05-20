@@ -1,3 +1,4 @@
+import os
 from math import sqrt
 import numpy as np
 from numpy import linalg
@@ -24,7 +25,7 @@ class Kmeans(object):
             # 计算每个sample对应的group
             for i, xi in enumerate(x):
                 # 选取对于sample xi来说，最近的group作为label，距离度量使用L2-Norm ^ 2
-                self.label[i] = np.argmin(linalg.norm(xi - self.mu, axis=1, keepdims=True) ** 2)
+                self.label[i] = np.argmin(linalg.norm(xi - self.mu, axis=1, keepdims=True))
             # 更新每个group的 mu_j 对应的颜色
             for j in range(self.k):
                 # 判断group j是否有数据点
@@ -41,7 +42,7 @@ class Kmeans(object):
         new_img = img.copy().astype(np.float64)
         for i in range(img.shape[0]):
             for j in range(img.shape[1]):
-                k = np.argmin(linalg.norm(new_img[i][j] - self.mu, axis=1, keepdims=True) ** 2)
+                k = np.argmin(linalg.norm(new_img[i][j] - self.mu, axis=1, keepdims=True))
                 new_img[i][j] = self.mu[k]
 
         return new_img
@@ -71,7 +72,19 @@ def serialization(img, color_bit=8):
     serialize(img, args.output + f"bird_large_serialized_{color_bit}bits.txt")
     print('deserializing pixel color txt to tiff img...')
     deserialize(args.output + f"bird_large_serialized_{color_bit}bits.txt", args.output + f"bird_large_deserialized_{color_bit}bits.tiff")
-    
+
+def append_result(input, output):
+    img = []
+    file = os.listdir(input)
+    for path in file:
+        with open(os.path.join(input, path), 'r') as f:
+            for line in f:
+                colors = line.split()
+                img.append(colors)
+
+    width = int(sqrt(len(img)))
+    img = np.array(img).reshape(width, width, 3).astype(np.uint8)
+    cv2.imwrite(output, img)
 
 if __name__ == "__main__":
 
@@ -96,8 +109,10 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # deserialize(args.input + f"part-r-00000", args.output + f"mapredoutput.tiff")
-    
+    # append_result(args.input + f"mapredoutput/sequence", args.output + f"mapredoutput/mapredoutput.tiff")
+    deserialize(args.input + "/mapredoutput/mapred_out", args.output + "/mapredoutput/mapred_out_img.tiff")
+
+    """
     large_img = cv2.imread(args.input + "bird_large.tiff")
     small_img = cv2.imread(args.input + "bird_small.tiff")
 
@@ -108,8 +123,9 @@ if __name__ == "__main__":
     print('converting 8 bit colors to 4 bit colors ...')
     kmeans = Kmeans(small_img, k=16)
     kmeans.train(loop=10)
-    new_img = (kmeans.reassign(large_img)).astype(np.uint8)
+    new_img = kmeans.reassign(large_img).astype(np.uint)
     # cv2.imwrite(args.output + "bird_large_4bits.tiff", ))
 
     # 序列化/反序列化颜色压缩图像
     serialization(new_img, 4)
+    """
