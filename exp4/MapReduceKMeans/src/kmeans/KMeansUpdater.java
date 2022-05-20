@@ -56,7 +56,14 @@ public class KMeansUpdater {
 
 		protected void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 			for (Text value : values) {
-				context.write(null, new Text(value.toString()));
+				String[] point = value.toString().split(" ");
+				StringBuilder output = new StringBuilder();
+				for (String p : point) {
+					output.append((int)Double.parseDouble(p));
+					output.append(' ');
+				}
+				
+				context.write(null, new Text(output.toString()));
 			}
 		}
 	}

@@ -26,7 +26,7 @@ public class KMeansDriver {
 				hdfs.delete(new Path(forItr[2]), true);
 			KMeansIterator.main(forItr);
 		}
-		*/
+        */
         String[] forUpd = {"", "", ""};
 		forUpd[0] = args[1] + "/Cluster_" + loopMax + "/part-r-00000";
         forUpd[1] = args[1] + "/Points";

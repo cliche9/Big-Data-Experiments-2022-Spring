@@ -1,9 +1,9 @@
 package kmeans;
 
 public class Point {
-    int _x;
-    int _y;
-    int _z;
+    double _x;
+    double _y;
+    double _z;
 
     public Point() {
         _x = 0;
@@ -13,9 +13,9 @@ public class Point {
 
     public Point(String pointInfo) {
         String[] list = pointInfo.split(" ");
-        _x = Integer.parseInt(list[0]);
-        _y = Integer.parseInt(list[1]);
-        _z = Integer.parseInt(list[2]);
+        _x = Double.parseDouble(list[0]);
+        _y = Double.parseDouble(list[1]);
+        _z = Double.parseDouble(list[2]);
     }
 
     public Point(Point p) {
@@ -26,7 +26,7 @@ public class Point {
 
     @Override
     public String toString() {
-        return Integer.toString(_x) + ' ' + Integer.toString(_y) + ' ' + Integer.toString(_z) + ' ';
+        return Double.toString(_x) + ' ' + Double.toString(_y) + ' ' + Double.toString(_z) + ' ';
     }
 
     public Point add(Point p) {
