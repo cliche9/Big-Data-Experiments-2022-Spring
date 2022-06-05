@@ -34,7 +34,7 @@
 
   * 输出：要求程序能够实现对 stop-words(如 a,an,the,in,of 等词)的去除，能够统计单词在 每篇文档中出现的频率
 
-    ![image-20220423165848649](https://cdn.jsdelivr.net/gh/cliche9/PicBeds/images/2022-04-23%2016-58-50%20image-20220423165848649.png)
+    ![image-20220423165848649](https://fastly.jsdelivr.net/gh/cliche9/PicBeds/images/2022-04-23%2016-58-50%20image-20220423165848649.png)
 
 * 本地伪分布式环境下完成程序编写调试
 
@@ -48,8 +48,26 @@
 
   * 输出：能够利用PageRank算法的思想计算出每个网页的PR值(迭代10次即可)
 
-    ![image-20220423165926995](https://cdn.jsdelivr.net/gh/cliche9/PicBeds/images/2022-04-23%2016-59-27%20image-20220423165926995.png)
+    ![image-20220423165926995](https://fastly.jsdelivr.net/gh/cliche9/PicBeds/images/2022-04-23%2016-59-27%20image-20220423165926995.png)
 
 * 在伪分布式环境下完成程序的编写和测试
 
 * 在集群上提交作业并执行
+
+## 实验四 并行并行化数据挖掘算法设计
+
+==选取K-Means算法进行设计==
+
+> * 自行准备数据集，设计一种数据挖掘算法(聚类、分类、频繁项集挖掘或其他主题)对数据集进行信息提取，要求分别使用并行化和非并行化的方式实现该算法。
+> * 实验环境可选择 Hadoop 或者 Spark，程序语言可选用 Java、Python、 Scala 等；
+> * 在伪分布式环境下完成并行化算法的编写和测试，在单机环境下完成非并行化算法的编写和测试；
+
+==**实验任务**==
+
+对三通道的TIFF图进行颜色压缩，将原本8-bit的颜色表示压缩为4-bit的颜色表示，通过聚类对原图片的颜色（共256种）进行聚类，聚成16类；
+
+原始图像数据
+
+![bird_large_deserialized](https://fastly.jsdelivr.net/gh/cliche9/PicBeds/images/2022-05-20-bird_large_deserialized.tiff)
+
+> 该图像来自Frank Wouters，仅用于学习用途；
