@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %} - MovieRecommendation</title>
+    <!-- Bootstrap CSS only -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" >
+  </head>
+  
+  <body>
+    {% block content %}
+    {% endblock %}
+    <!-- Bootstrap JavaScript Bundle with Popper -->
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  </body>
+
+</html>
