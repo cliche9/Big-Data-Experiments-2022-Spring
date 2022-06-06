@@ -1,8 +1,5 @@
 from codecs import getdecoder
-from operator import methodcaller
-from pydoc import getpager
-from webbrowser import get
-
+from contextlib import redirect_stdout
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for
 )
@@ -33,20 +30,20 @@ def create():
         body = request.form['body']
         error = None
 
-    if not title:
-        error = 'This is required'
-    
-    if error is not None:
-        flash(error)
-    else:
-        db = get_db()
-        db.execute(
-            'INSERT INTO post (title, body, author_id)'
-            ' VALUES (? ? ?)',
-            (title, body, g.user['id'])
-        )
-        db.commit()
-        return redirect(url_for('blog.index'))
+        if not title:
+            error = 'This is required'
+        
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            db.execute(
+                'INSERT INTO post (title, body, author_id)'
+                ' VALUES (?, ?, ?)',
+                (title, body, g.user['id'])
+            )
+            db.commit()
+            return redirect(url_for('blog.index'))
     
     return render_template('blog/create.html')
 
@@ -68,12 +65,13 @@ def get_post(id, check_author=True):
     return post
 
 # 更新blog
+# <int:id> 会自动捕捉URL中的id作为参数传给update, 否则我们需要url_for时自己传参数
 @bp.route('/<int:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
     post = get_post(id)
 
-    if request.methos == 'POST':
+    if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
         error = None
@@ -87,7 +85,7 @@ def update(id):
             db = get_db()
             db.execute(
                 'UPDATE post SET title = ?, body = ?'
-                'WHERE id = ?'
+                ' WHERE id = ?',
                 (title, body, id)
             )
             db.commit()
@@ -96,3 +94,14 @@ def update(id):
     return render_template('blog/update.html', post=post)
 
 # 删除blog
+@bp.route('/<int:id>/delete', methods=('POST',))
+@login_required
+def delete(id):
+    get_post(id)
+    db = get_db()
+    db.execute(
+        'DELETE FROM post WHERE id = ?', (id, )
+    )
+    db.commit()
+    return redirect(url_for('blog.index'))
+    
