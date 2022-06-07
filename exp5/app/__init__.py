@@ -30,11 +30,9 @@ def create_app(test_config=None):
     def hello():
         return 'Hello, World!'
 
-    from . import db, auth, movie
+    from . import db, movie
     # app注册数据库初始化函数
     db.init_app(app)
-    # app注册用户auth蓝图
-    # app.register_blueprint(auth.bp)
     # app注册电影movie蓝图
     app.register_blueprint(movie.bp)
     app.add_url_rule('/', endpoint='index')
