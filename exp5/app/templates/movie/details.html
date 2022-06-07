@@ -3,7 +3,7 @@
 {% block title %}Details{% endblock %}
 
 {% block ref %}
-
+<link rel="stylesheet" href="{{ url_for('static', filename='css/details.css') }}" >
 {% endblock %}
 
 {% block content %}
@@ -12,12 +12,17 @@
 <section class="py-5 text-center container">
   <div class="row py-lg-5">
     <div class="col-lg-6 col-md-8 mx-auto">
-      <div class="card shadow-sm">
-        <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"/><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-          </div>
+      <div class="row">
+        <div class="col-md-6 how-img">
+          <img src="../../static/images/{{ movie_info['movieId'] }}.jpg" class="figure-img img-fluid rounded" alt=""/>
+        </div>
+        <div class="col-md-6">
+          <ul style="text-align: left">
+            <h4>{{ movie_info['title'] }}</h4>
+            <br>
+            <p>IMDB: {{ movie_info['imdbId'] }}</p>
+            <p>Genres: {{ movie_info['genres'] }}</p>
+          </ul>
         </div>
       </div>
     </div>
@@ -25,24 +30,18 @@
 </section>
 
 <!-- 副电影, 展示推荐的3个电影的海报, 提供查看接口 -->
-<div class="album py-5 bg-light">
+<div class="album bg-light">
+  <legend style="text-align: center">You might like ...</legend>
+
   <div class="container">
-    
-    {% for movie in relative_movies %}
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
       <div class="col">
-        <div class="card shadow-sm">
-          <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"/><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-            </div>
-          </div>
-        </div>
+        <figure class="figure" style="text-align: center">
+          <img src="../../static/images/{{ movie_info['movieId'] }}.jpg" class="figure-img img-fluid rounded" alt="...">
+          <figcaption class="figure-caption">{{ movie_info['title'] }}</figcaption>
+          <button type="button" class="btn btn-sm btn-outline-secondary">Details</button>
+        </figure>
       </div>
-    {% endfor %}
-
     </div>
   </div>
 </div>

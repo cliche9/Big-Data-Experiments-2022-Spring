@@ -1,6 +1,10 @@
+import imdb
+import csv
+
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for
 )
+from sqlalchemy import null
 from werkzeug.exceptions import abort
 
 from app.db import get_db
@@ -16,30 +20,33 @@ def index():
 def get_movie(name):
     db = get_db()
     # 查找电影
-    movie = db.execute(
-        'SELECT p.id, title, body, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
-        ' WHERE p.id = ?',
-        (name, )
-    ).fetchone()
+    movie = dict(
+        db.execute(
+            'SELECT movies.*, links.imdbId'
+            ' FROM movies JOIN links'
+            ' WHERE title LIKE ?',
+            ('%' + name + '%', )
+        ).fetchone()
+    )
 
     if movie is None:
         abort(404, f"Movie《{name}》doesn't exist.")
     
     # 查找推荐的电影
-    related_movies = db.execute(
+    related_movies = null
+    #db.execute(
         
-    ).fetchall()
+    #).fetchall()
+    movie['relatives'] = related_movies
 
-    return movie, related_movies
+    return movie
 
-# 查找movie
-@bp.route('/search', methods=('POST',))
-def search(name):
-    movie, related_movies = get_movie(name)
-    return render_template('movie/details.html', movie=movie, related_movies=related_movies)
-
-# 主页面
+# 详细界面
 @bp.route('/details', methods=('GET', 'POST'))
 def details():
-    return render_template('movie/details.html')
+    if request.method == 'POST':
+        movie_info = get_movie(request.form['movie_name'])
+        return render_template('movie/details.html', movie_info=movie_info)
+    elif request.method == 'GET':
+        movie_info = get_movie(request)
+        return render_template('movie/details.html', movie_info=movie_info)

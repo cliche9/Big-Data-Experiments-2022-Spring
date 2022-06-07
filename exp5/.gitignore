@@ -9,4 +9,7 @@ dist/
 build/
 *.egg-info/
 
-/dataset
+.DS_Store
+/MLP-20M-Dataset
+
+*.jpg
