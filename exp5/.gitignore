@@ -1,0 +1,16 @@
+*.pyc
+__pycache__/
+
+instance/
+.pytest_cache/
+htmlcov/
+
+dist/
+build/
+*.egg-info/
+
+.DS_Store
+/MLP-20M-Dataset
+
+*.jpg
+*.zip

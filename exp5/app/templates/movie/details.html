@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Details{% endblock %}
+
+{% block ref %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/details.css') }}" >
+{% endblock %}
+
+{% block content %}
+
+<!-- 主电影, 展示海报及详细信息 -->
+<section class="py-5 text-center container">
+  <div class="row py-lg-5">
+    <div class="col-lg-6 col-md-8 mx-auto">
+      <div class="row">
+        <div class="col-md-6 how-img">
+          <img src="../../static/images/{{ movie_info['movieId'] }}.jpg" class="figure-img img-fluid rounded" alt=""/>
+        </div>
+        <div class="col-md-6">
+          <ul style="text-align: left">
+            <h4>{{ movie_info['title'] }}</h4>
+            <br>
+            <p>IMDB: {{ movie_info['imdbId'] }}</p>
+            <p>Genres: {{ movie_info['genres'] }}</p>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 副电影, 展示推荐的3个电影的海报, 提供查看接口 -->
+<div class="album bg-light">
+  <legend style="text-align: center">You might like ...</legend>
+
+  <div class="container">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+      
+      
+      <div class="col">
+        <figure class="figure" style="text-align: center">
+          <img src="../../static/images/{{ movie_info['movieId'] }}.jpg" class="figure-img img-fluid rounded" alt="...">
+          <figcaption class="figure-caption">{{ movie_info['title'] }}</figcaption>
+          <button type="button" class="btn btn-sm btn-outline-secondary">Details</button>
+        </figure>
+      </div>
+
+
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
