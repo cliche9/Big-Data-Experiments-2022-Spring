@@ -1,11 +1,6 @@
-import os
 import pandas as pd
-import numpy as np
-import sys
-from operator import itemgetter
 from collections import defaultdict
-from sqlalchemy import asc
-from tqdm import trange, tqdm
+from tqdm import tqdm
 
 def data_info(data):
     print('Head:')
