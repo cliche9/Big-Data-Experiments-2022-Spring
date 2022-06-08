@@ -1,6 +1,3 @@
-import imdb
-import csv
-
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for
 )
@@ -20,18 +17,17 @@ def index():
 def get_movie(name):
     db = get_db()
     # 查找电影
-    movie = dict(
-        db.execute(
-            'SELECT movies.*, links.imdbId'
-            ' FROM movies JOIN links'
-            ' WHERE title LIKE ?',
-            ('%' + name + '%', )
-        ).fetchone()
-    )
+    movie = db.execute(
+        'SELECT movies.*, links.imdbId'
+        ' FROM movies JOIN links'
+        ' WHERE title LIKE ?',
+        ('%' + name + '%', )
+    ).fetchone()
 
     if movie is None:
         abort(404, f"Movie《{name}》doesn't exist.")
     
+    movie = dict(movie)
     # 查找推荐的电影
     related_movies = null
     #db.execute(
