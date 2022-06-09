@@ -1,5 +1,8 @@
+from codecs import getdecoder
+from gc import get_debug
+from gettext import find
 import sqlite3
-import csv
+from tqdm import trange
 
 import click
 from flask import current_app, g
@@ -44,4 +47,3 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     # 添加命令行
     app.cli.add_command(init_db_command)
-

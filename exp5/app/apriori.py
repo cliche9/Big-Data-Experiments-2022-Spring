@@ -35,6 +35,9 @@ favorable_movies_by_user = dict(
     (k, frozenset(v.values))
     for k, v in favorable_ratings.groupby('userId')['movieId']
 )
+
+favorable_ratings.groupby('userId')['movieId'].info()
+
 # 每部电影的喜欢人数 { key: movieId, value: 个数 }
 num_favorable_by_movie = favorable_ratings[['movieId', 'favorable']].groupby('movieId').sum()
 print("初始化了电影相关数据信息")
